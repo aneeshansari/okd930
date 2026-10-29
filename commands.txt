@@ -1,0 +1,186 @@
+
+
+bash
+
+```
+# ==============================
+# 1. PODS AND NAMESPACES
+# ==============================
+
+oc get pods                                  # List pods in current project
+oc get pods -A                               # List pods in all namespaces
+oc get pods -n my-project                    # List pods in a specific project
+oc get pods -o wide                          # Show pods with node and IP details
+oc get pods -w                               # Watch pod status continuously
+oc get pods --show-labels                    # Display pod labels
+oc describe pod <pod-name>                   # Show detailed pod information
+oc get pod <pod-name> -o yaml                # Display pod YAML configuration
+oc get pod <pod-name> -o json                # Display pod details in JSON
+oc get namespaces                            # List all namespaces
+oc get projects                              # List accessible OpenShift projects
+oc project                                   # Show current project
+oc project my-project                        # Switch to a project
+
+# ==============================
+# 2. NODES AND CLUSTER
+# ==============================
+
+oc get nodes                                 # List cluster nodes
+oc get nodes -o wide                         # Show node IPs and roles
+oc get nodes --show-labels                   # Display node labels
+oc describe node <node-name>                # Show node details and conditions
+oc get node <node-name> -o yaml             # Display node YAML configuration
+oc get clusteroperators                      # Check cluster operator status
+oc get clusterversion                         # Check OpenShift version
+oc cluster-info                              # Display cluster endpoints
+oc get events --sort-by=.metadata.creationTimestamp  # List project events by time
+oc get events -A --sort-by=.metadata.creationTimestamp  # List events across namespaces
+
+# ==============================
+# 3. POD LOGS
+# ==============================
+
+oc logs <pod-name>                           # Display pod logs
+oc logs -f <pod-name>                        # Follow logs live
+oc logs --tail=100 <pod-name>                # Show last 100 log lines
+oc logs --since=30m <pod-name>               # Show logs from last 30 minutes
+oc logs --timestamps <pod-name>              # Include timestamps in logs
+oc logs <pod-name> --previous                # Show logs from previous container instance
+oc logs <pod-name> -n my-project             # Read logs from a specific project
+oc logs <pod-name> -c <container-name>       # Read logs from one container
+oc logs -f <pod-name> -c <container-name>    # Follow one container's logs
+oc logs <pod-name> -c <container-name> --previous  # Read previous instance logs
+oc logs <pod-name> --all-containers=true     # Read logs from all pod containers
+oc logs -f <pod-name> --all-containers=true  # Follow logs from all containers
+
+# ==============================
+# 4. MULTIPLE CONTAINERS IN A POD
+# ==============================
+
+oc get pod <pod-name> -o jsonpath='{.spec.containers[*].name}'  # List container names
+oc logs <pod-name> -c app                     # Read app container logs
+oc logs <pod-name> -c sidecar                 # Read sidecar container logs
+oc logs -f <pod-name> -c app                  # Follow app container logs
+oc logs <pod-name> -c app --tail=200          # Show last 200 app log lines
+oc logs <pod-name> -c app --previous          # Read previous app container logs
+oc logs <pod-name> -n my-project -c app       # Read app logs in a specific project
+oc describe pod <pod-name>                    # Inspect all container statuses
+oc get pod <pod-name> -o jsonpath='{range .status.containerStatuses[*]}{.name}{" | Ready="}{.ready}{" | Restarts="}{.restartCount}{"\n"}{end}'  # Show readiness and restart counts
+
+# ==============================
+# 5. EXEC COMMANDS
+# ==============================
+
+oc exec -it <pod-name> -- /bin/sh             # Open shell inside a pod
+oc exec -it <pod-name> -- /bin/bash           # Open Bash shell if installed
+oc exec <pod-name> -- ls -l /                 # List root directory contents
+oc exec <pod-name> -- env                     # Display environment variables
+oc exec <pod-name> -- ps -ef                  # List running processes
+oc exec <pod-name> -- df -h                   # Check filesystem disk usage
+oc exec <pod-name> -- cat /etc/hosts          # Display hosts file
+oc exec -it <pod-name> -c <container-name> -- /bin/sh  # Open shell in a specific container
+oc exec -it <pod-name> -n my-project -- /bin/sh  # Open shell in a project
+oc exec -it <pod-name> -n my-project -c app -- /bin/sh  # Open shell in a specific container and project
+
+# ==============================
+# 6. RSH COMMANDS
+# ==============================
+
+oc rsh <pod-name>                             # Open remote shell in a pod
+oc rsh -n my-project <pod-name>               # Open shell in a specific project
+oc rsh -c app <pod-name>                      # Open shell in a specific container
+oc rsh -n my-project -c app <pod-name>        # Open shell in a container and project
+
+# ==============================
+# 7. DEPLOYMENTS, SERVICES AND ROUTES
+# ==============================
+
+oc get deployments                            # List deployments
+oc describe deployment <deployment-name>     # Show deployment details
+oc get rs                                    # List ReplicaSets
+oc get svc                                   # List services
+oc get routes                                # List OpenShift routes
+oc get endpoints                             # List service endpoints
+oc rollout status deployment/<deployment-name>  # Check deployment rollout status
+oc rollout history deployment/<deployment-name> # View deployment revision history
+oc rollout restart deployment/<deployment-name> # Restart deployment pods
+oc scale deployment/<deployment-name> --replicas=3  # Set deployment replica count
+oc get pods -l app=my-app                    # Find pods matching a label
+oc describe svc <service-name>               # Inspect service configuration
+oc describe route <route-name>               # Inspect route and destination details
+
+# ==============================
+# 8. TROUBLESHOOTING
+# ==============================
+
+oc get pods                                  # Check pod status and restart counts
+oc logs <pod-name> --previous                # Inspect logs from a crashed container
+oc logs <pod-name> -c <container-name> --previous  # Inspect previous logs for one container
+oc get events --sort-by=.metadata.creationTimestamp  # Find recent events and errors
+oc adm top pods                              # Check pod CPU and memory usage
+oc adm top nodes                             # Check node CPU and memory usage
+oc get pvc                                   # List persistent volume claims
+oc get pv                                    # List persistent volumes
+oc get pods | grep CrashLoopBackOff          # Filter pods showing CrashLoopBackOff
+
+# ==============================
+# 9. OUTPUT AND FILTERING
+# ==============================
+
+oc get pods -o custom-columns=NAME:.metadata.name  # Display only pod names
+oc get pods -o custom-columns=NAME:.metadata.name,STATUS:.status.phase,NODE:.spec.nodeName  # Show pod name, status and node
+oc get pods -o custom-columns=NAME:.metadata.name,IP:.status.podIP  # Show pod names and IPs
+oc get pods -l app=my-app                    # Filter pods by app label
+oc get deployment <deployment-name> -o yaml # Export deployment YAML
+oc get pod <pod-name> -o json                # Display pod JSON
+oc get pods,svc,deployments -A               # List pods, services and deployments across namespaces
+
+# ==============================
+# 10. COPY FILES
+# ==============================
+
+oc cp ./config.txt <pod-name>:/tmp/config.txt  # Copy local file into pod
+oc cp <pod-name>:/tmp/app.log ./app.log       # Copy file from pod to local machine
+oc cp ./config.txt <pod-name>:/tmp/config.txt -c app  # Copy file into a specific container
+oc cp my-project/<pod-name>:/tmp/app.log ./app.log  # Copy file from a specific project
+
+# ==============================
+# 11. LOGIN AND AUTHENTICATION
+# ==============================
+
+oc login <cluster-url>                       # Log in to an OpenShift cluster
+oc login <cluster-url> --token=<token>       # Log in using an access token
+oc whoami                                    # Show currently logged-in user
+oc whoami --show-server                      # Display current API server URL
+oc auth can-i get pods                       # Check permission to read pods
+oc auth can-i create deployments             # Check permission to create deployments
+oc auth can-i --list                         # List available permissions
+
+# ==============================
+# 12. RESOURCE USAGE AND QUICK CHECKS
+# ==============================
+
+oc adm top pods -n my-project                # Show resource usage in a project
+oc get pods -n my-project -o wide            # Check pod placement and IPs
+oc describe pod <pod-name> -n my-project     # Inspect pod events and conditions
+oc logs <pod-name> -n my-project --tail=200 # Read last 200 log lines
+oc logs <pod-name> -n my-project -c <container-name> --tail=200  # Read logs from one container
+oc logs <pod-name> -n my-project -c <container-name> --previous  # Check previous container logs
+oc exec -it <pod-name> -n my-project -c <container-name> -- /bin/sh  # Enter target container
+oc get events -n my-project --sort-by=.metadata.creationTimestamp  # Check recent project events
+oc rollout status deployment/<deployment-name> -n my-project  # Verify deployment rollout
+
+# ==============================
+# NOTES
+# ==============================
+
+# Replace placeholders with actual resource names.
+# Example: <pod-name> -> my-app-7d8f9c6b5-x2abc
+# Example: <container-name> -> app
+# Example: my-project -> dev-project
+# Use /bin/sh if /bin/bash is not installed.
+# Some minimal containers have no shell available.
+# oc cp may require tar inside the container.
+# oc adm top requires metrics to be available and sufficient permissions.
+# Be careful with restart and scale commands in production.
+```
